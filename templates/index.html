@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+ <div class="container">
+        <div class="nav">
+            <a href="/register">Регистрация</a>
+            <a href="/login">Логин</a>
+            <a href="/create_post">Создать пост</a>
+            <a href="/logout">Выйти</a>
+        </div>
+
+        <h2>Все посты:</h2>
+
+        {% for post in posts %}
+        <div class="post">
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.content }}</p>
+            <small>Опубликовано: {{ post.date_posted }}</small>
+
+            <div class="post-actions">
+                <!-- Лайки -->
+                <form action="{{ url_for('like_post', post_id=post.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="like-btn">
+                        ❤️ {{ post.likes|length }} лайков
+                    </button>
+                </form>
+
+              <!-- Кнопка переключения комментариев -->
+                <button class="comment-btn" onclick="toggleComments({{ post.id }})">
+                    💬 {{ post.comments|length }} комментариев
+                </button>
+            </div>
+
+            <!-- Блок комментариев - изначально скрыт -->
+            <div id="comments-{{ post.id }}" class="comments-section" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4>Комментарии:</h4>
+                    <button class="toggle-comments" onclick="toggleComments({{ post.id }})">Скрыть</button>
+                </div>
+
+                {% for comment in post.comments %}
+                <div class="comment">
+                    <strong>{{ comment.author.username }}:</strong>
+                    <p>{{ comment.text }}</p>
+                    <small>{{ comment.date_posted }}</small>
+                </div>
+                {% endfor %}
+
+                <!-- Форма добавления комментария -->
+                <form action="{{ url_for('add_comment', post_id=post.id) }}" method="POST" class="comment-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <textarea name="comment_text" placeholder="Ваш комментарий..." required></textarea>
+                    <button type="submit" class="btn">Отправить</button>
+                </form>
+            </div>
+        </div>
+
+
+
+
+    <script>
+    function toggleComments(postId) {
+        const commentsSection = document.getElementById('comments-' + postId);
+        commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+    }
+    </script>
+    {% endfor %}
+</div>
+
+
+</body>
+</html>
