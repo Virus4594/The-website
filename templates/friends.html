@@ -53,7 +53,7 @@
                 {% for friend in friends %}
                     <div class="friend-card">
                         <p>{{ friend.username }}</p>
-                        <a href="{{ url_for('messages', username=friend.username) }}" class="btn">Написать сообщение</a>
+                        <a href="{{ url_for('message', username=friend.username) }}" class="btn">Написать сообщение</a>
                     </div>
                 {% endfor %}
             {% else %}
