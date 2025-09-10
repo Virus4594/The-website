@@ -9,15 +9,28 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
- <div class="container">
-        <div class="nav">
+
+<!-- Сайдбар -->
+     <div class="sidebar">
+<button class="menu-btn" onclick="menu.hidden^=1">Меню ☰</button>
+<ul class="sidebar" id="menu" hidden>
             <a href="/register">Регистрация</a>
             <a href="/login">Логин</a>
+            <a href="/all_users">Все пользователи</a>
             <a href="/create_post">Создать пост</a>
+            <a href="/profile">Мой профиль</a>
+            <a href="/search">Поиск друзей</a>
+            <a href="/friends">Мои друзья</a>
+            <a href="/messages">Сообщения</a>
             <a href="/logout">Выйти</a>
-        </div>
 
-        <h2>Все посты:</h2>
+</ul>
+    </div>
+
+     <div class="container">
+        <div class="nav">
+
+
 
         {% for post in posts %}
         <div class="post">
@@ -27,11 +40,12 @@
 
             <div class="post-actions">
                 <!-- Лайки -->
-                <form action="{{ url_for('like_post', post_id=post.id) }}" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <button type="submit" class="like-btn">
-                        ❤️ {{ post.likes|length }} лайков
-                    </button>
+                <form action="{{ url_for('like_post', post_id=post.id) }}" method="POST"
+                      data-action="like" data-post-id="{{ post.id }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                      <button type="submit" class="like-btn">
+                           ❤️ <span class="likes-count">{{ post.likes|length }} лайков</span>
+                      </button>
                 </form>
 
               <!-- Кнопка переключения комментариев -->
@@ -64,18 +78,76 @@
             </div>
         </div>
 
+{% endfor %}
 
 
+<script>
+// Функция для меню (переименовал!)
+function toggleSidebarMenu() {
+    const menu = document.getElementById('menu');
+    menu.hidden = !menu.hidden;
+}
 
-    <script>
-    function toggleComments(postId) {
-        const commentsSection = document.getElementById('comments-' + postId);
-        commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+
+// Функция для AJAX-лайков
+async function likePost(postId, csrfToken) {
+    const formData = new FormData();
+    formData.append('csrf_token', csrfToken); // Добавляем CSRF токен
+
+    try {
+        const response = await fetch(`/like_post/${postId}`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error('Server error');
+        }
+
+        const result = await response.json();
+
+        // Обновляем кнопку и счетчик
+        const likesCount = document.querySelector(`form[data-action="like"][data-post-id="${postId}"] .likes-count`);
+        const likeBtn = document.querySelector(`form[data-action="like"][data-post-id="${postId}"] button`);
+
+        likesCount.textContent = result.likes_count + ' лайков';
+
+        if (result.liked) {
+            likeBtn.style.color = 'red';
+        } else {
+            likeBtn.style.color = 'gray';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        // Если AJAX не работает, делаем обычную отправку формы
+        document.querySelector(`form[data-action="like"][data-post-id="${postId}"]`).submit();
     }
-    </script>
-    {% endfor %}
-</div>
+}
 
+// Вешаем обработчики на формы лайков
+document.addEventListener('DOMContentLoaded', function() {
+    const likeForms = document.querySelectorAll('form[data-action="like"]');
+
+    likeForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const postId = this.dataset.postId;
+            const csrfToken = this.querySelector('input[name="csrf_token"]').value;
+            likePost(postId, csrfToken);
+        });
+    });
+});
+
+// Функция для комментариев
+function toggleComments(postId) {
+    const commentsSection = document.getElementById('comments-' + postId);
+    if (commentsSection.style.display === 'none') {
+        commentsSection.style.display = 'block';
+    } else {
+        commentsSection.style.display = 'none';
+    }
+}
+</script>
 
 </body>
 </html>

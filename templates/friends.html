@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Мои друзья</title>
+</head>
+<body>
+     <div class="container">
+        <div class="nav">
+            <a href="/">Главная</a>
+            <a href="/search">Поиск друзей</a>
+            <a href="/profile">Профиль</a>
+        </div>
+
+        <h2>Мои друзья</h2>
+
+        <!-- Входящие запросы -->
+        {% if incoming_requests %}
+            <div class="friends-section">
+                <h3>Запросы в друзья:</h3>
+                {% for request in incoming_requests %}
+                    <div class="friend-request">
+                        <p>{{ request.user.username }} хочет добавить вас в друзья</p>
+                        <form method="POST" action="{{ url_for('accept_friend', friendship_id=request.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="btn">Принять</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Исходящие запросы -->
+        {% if outgoing_requests %}
+            <div class="friends-section">
+                <h3>Ваши исходящие запросы:</h3>
+                {% for request in outgoing_requests %}
+                    <div class="friend-request">
+                        <p>Вы отправили запрос {{ request.friend.username }}</p>
+                        <span>Ожидание ответа...</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Список друзей -->
+        <div class="friends-section">
+            <h3>Ваши друзья ({{ friends|length }}):</h3>
+            {% if friends %}
+                {% for friend in friends %}
+                    <div class="friend-card">
+                        <p>{{ friend.username }}</p>
+                        <a href="{{ url_for('messages', username=friend.username) }}" class="btn">Написать сообщение</a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>У вас пока нет друзей</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
