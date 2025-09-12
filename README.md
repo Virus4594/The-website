@@ -29,5 +29,5 @@
 
 1. **Клонируй репозиторий:**
 ```bash
-git clone https://github.com/твой-username/твой-репозиторий.git
+git clone https://github.com/Virus4594/The-website.git
 cd flask-messenger
