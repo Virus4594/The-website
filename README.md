@@ -18,9 +18,8 @@
 - **Flask-WTF** - Защита от CSRF атак
 
 ### Frontend:
-- **HTML5/CSS3** - Вёрстка и стили
+- **HTML/CSS** - Вёрстка и стили
 - **JavaScript** - AJAX и динамика
-- **Bootstrap-подобный UI** - Адаптивный дизайн
 
 ### База данных:
 - **SQLite** (разработка) / **PostgreSQL** (продакшен)
@@ -29,5 +28,14 @@
 
 1. **Клонируй репозиторий:**
 ```bash
-git clone https://github.com/твой-username/твой-репозиторий.git
-cd flask-messenger
+git clone https://github.com/Virus4594/The-website.git
+cd The-website
+после этого надо ввести команды
+python
+у вас переключится на
+Python Console
+>>> from app import app, db - создаем новую ДБ
+>>> app.app_context().push()
+>>> db.create_all()
+>>> exit() - выходим из python console
+далее у вас создаться база данных и вы сможете запустить программу если буду проблемы пишите в тг t.me/ViRuS4594
