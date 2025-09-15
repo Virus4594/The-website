@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Поиск друзей</title>
+</head>
+<body>
+   <div class="container">
+        <div class="nav">
+            <a href="/">Главная</a>
+            <a href="/friends">Друзья</a>
+            <a href="/profile">Профиль</a>
+        </div>
+
+        <h2>Поиск друзей</h2>
+
+        <form method="GET" action="/search" class="search-form">
+            <input type="text" name="q" value="{{ query }}" placeholder="Введите имя пользователя">
+            <button type="submit" class="btn">Найти</button>
+        </form>
+
+        {% if users %}
+            <div class="search-results">
+                <h3>Результаты поиска:</h3>
+                {% for user in users %}
+                    <div class="user-card">
+                        <p>{{ user.username }}</p>
+                        {% if user.id != session['user_id'] %}
+                            <form method="POST" action="{{ url_for('add_friend', friend_id=user.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="submit" class="btn">Добавить в друзья</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% elif query %}
+            <p>Пользователи не найдены</p>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<p><strong>Зарегистрирован:</strong>
+  {% if user.created_at %}
+    {{ user.created_at.strftime('%d.%m.%Y') }}
+  {% else %}
+    Дата не указана
+  {% endif %}
+</p>
+    <h1>Профиль пользователя</h1>
+    {% if user %}
+        <p>Имя: {{ user.username }}</p>
+        <p>ID: {{ user.id }}</p>
+    {% else %}
+        <p>Ошибка загрузки профиля</p>
+    {% endif %}
+    <a href="/">На главную</a>
+</body>
+</html>
+

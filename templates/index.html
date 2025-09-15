@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- Сайдбар -->
+     <div class="sidebar">
+<button class="menu-btn" onclick="menu.hidden^=1">Меню ☰</button>
+<ul class="sidebar" id="menu" hidden>
+            <a href="/register">Регистрация</a>
+            <a href="/login">Логин</a>
+            <a href="/all_users">Все пользователи</a>
+            <a href="/create_post">Создать пост</a>
+            <a href="/profile">Мой профиль</a>
+            <a href="/search">Поиск друзей</a>
+            <a href="/friends">Мои друзья</a>
+            <a href="/messages">Сообщения</a>
+            <a href="/logout">Выйти</a>
+
+</ul>
+    </div>
+
+     <div class="container">
+        <div class="nav">
+
+
+
+        {% for post in posts %}
+        <div class="post">
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.content }}</p>
+            <small>Опубликовано: {{ post.date_posted }}</small>
+
+            <div class="post-actions">
+                <!-- Лайки -->
+                <form action="{{ url_for('like_post', post_id=post.id) }}" method="POST"
+                      data-action="like" data-post-id="{{ post.id }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                      <button type="submit" class="like-btn">
+                           ❤️ <span class="likes-count">{{ post.likes|length }} лайков</span>
+                      </button>
+                </form>
+
+              <!-- Кнопка переключения комментариев -->
+                <button class="comment-btn" onclick="toggleComments({{ post.id }})">
+                    💬 {{ post.comments|length }} комментариев
+                </button>
+            </div>
+
+            <!-- Блок комментариев - изначально скрыт -->
+            <div id="comments-{{ post.id }}" class="comments-section" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4>Комментарии:</h4>
+                    <button class="toggle-comments" onclick="toggleComments({{ post.id }})">Скрыть</button>
+                </div>
+
+                {% for comment in post.comments %}
+                <div class="comment">
+                    <strong>{{ comment.author.username }}:</strong>
+                    <p>{{ comment.text }}</p>
+                    <small>{{ comment.date_posted }}</small>
+                </div>
+                {% endfor %}
+
+                <!-- Форма добавления комментария -->
+                <form action="{{ url_for('add_comment', post_id=post.id) }}" method="POST" class="comment-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <textarea name="comment_text" placeholder="Ваш комментарий..." required></textarea>
+                    <button type="submit" class="btn">Отправить</button>
+                </form>
+            </div>
+        </div>
+
+{% endfor %}
+
+
+<script>
+// Функция для меню (переименовал!)
+function toggleSidebarMenu() {
+    const menu = document.getElementById('menu');
+    menu.hidden = !menu.hidden;
+}
+
+
+// Функция для AJAX-лайков
+async function likePost(postId, csrfToken) {
+    const formData = new FormData();
+    formData.append('csrf_token', csrfToken); // Добавляем CSRF токен
+
+    try {
+        const response = await fetch(`/like_post/${postId}`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error('Server error');
+        }
+
+        const result = await response.json();
+
+        // Обновляем кнопку и счетчик
+        const likesCount = document.querySelector(`form[data-action="like"][data-post-id="${postId}"] .likes-count`);
+        const likeBtn = document.querySelector(`form[data-action="like"][data-post-id="${postId}"] button`);
+
+        likesCount.textContent = result.likes_count + ' лайков';
+
+        if (result.liked) {
+            likeBtn.style.color = 'red';
+        } else {
+            likeBtn.style.color = 'gray';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        // Если AJAX не работает, делаем обычную отправку формы
+        document.querySelector(`form[data-action="like"][data-post-id="${postId}"]`).submit();
+    }
+}
+
+// Вешаем обработчики на формы лайков
+document.addEventListener('DOMContentLoaded', function() {
+    const likeForms = document.querySelectorAll('form[data-action="like"]');
+
+    likeForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const postId = this.dataset.postId;
+            const csrfToken = this.querySelector('input[name="csrf_token"]').value;
+            likePost(postId, csrfToken);
+        });
+    });
+});
+
+// Функция для комментариев
+function toggleComments(postId) {
+    const commentsSection = document.getElementById('comments-' + postId);
+    if (commentsSection.style.display === 'none') {
+        commentsSection.style.display = 'block';
+    } else {
+        commentsSection.style.display = 'none';
+    }
+}
+</script>
+
+</body>
+</html>

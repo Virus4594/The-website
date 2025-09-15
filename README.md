@@ -29,13 +29,4 @@
 1. **Клонируй репозиторий:**
 ```bash
 git clone https://github.com/Virus4594/The-website.git
-cd The-website
-после этого надо ввести команды
-python
-у вас переключится на
-Python Console
->>> from app import app, db - создаем новую ДБ
->>> app.app_context().push()
->>> db.create_all()
->>> exit() - выходим из python console
-далее у вас создаться база данных и вы сможете запустить программу если буду проблемы пишите в тг t.me/ViRuS4594
+cd flask-messenger
